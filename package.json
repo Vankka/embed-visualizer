@@ -4,7 +4,7 @@
   "license": "MIT",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://leovoel.github.io/embed-visualizer/",
+  "homepage": "https://liz3.github.io/embed-visualizer/",
   "devDependencies": {
     "husky": "^4.3.7",
     "prettier": "^2.2.1",
