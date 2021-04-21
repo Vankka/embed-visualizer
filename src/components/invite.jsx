@@ -67,9 +67,9 @@ const DiscordInvite = ({ inviteCode, isLightMode }) => {
               invite.guild.icon.startsWith("a_") ? "gif" : "png"
             }`,
           }}
-        ></div>
+        />
         <div className="di-details di-flex">
-          <div s>
+          <div>
             <h5
               onClick={() =>
                 window.open(`https://discord.gg/${invite.code}`, "_blank")
@@ -84,11 +84,11 @@ const DiscordInvite = ({ inviteCode, isLightMode }) => {
             className="di-d-details"
             style={isLightMode ? { color: "#4f5660" } : null}
           >
-            <i className="di-d-d-online"></i>
+            <i className="di-d-d-online" />
             <span>
               {invite.approximate_presence_count.toLocaleString()} Online
             </span>
-            <i className="di-d-d-offline"></i>
+            <i className="di-d-d-offline" />
             <span>
               {invite.approximate_member_count.toLocaleString()} Members
             </span>

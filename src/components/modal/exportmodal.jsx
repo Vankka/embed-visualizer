@@ -2,21 +2,23 @@ import React from "react";
 import hljs from "highlight.js";
 import Modal from "./modal";
 
-import discord4j from "../snippets/discord4j";
-import discordnet from "../snippets/discordnet";
-import dsharpplus from "../snippets/dsharpplus";
-import dsharpplusEmbedbuilder from "../snippets/dsharpplus-embedbuilder";
-import discordpy from "../snippets/discordpy";
-import discordie from "../snippets/discordie";
-import discordjs from "../snippets/discordjs";
-import discordio from "../snippets/discordio";
-import restcord from "../snippets/restcord";
-import eris from "../snippets/eris";
-import discordrb from "../snippets/discordrb";
-import jda from "../snippets/jda";
-import discordjsv12 from "../snippets/discordjsv12";
+import directExport from "../../snippets/export";
+import discord4j from "../../snippets/discord4j";
+import discordnet from "../../snippets/discordnet";
+import dsharpplus from "../../snippets/dsharpplus";
+import dsharpplusEmbedbuilder from "../../snippets/dsharpplus-embedbuilder";
+import discordpy from "../../snippets/discordpy";
+import discordie from "../../snippets/discordie";
+import discordjs from "../../snippets/discordjs";
+import discordio from "../../snippets/discordio";
+import restcord from "../../snippets/restcord";
+import eris from "../../snippets/eris";
+import discordrb from "../../snippets/discordrb";
+import jda from "../../snippets/jda";
+import discordjsv12 from "../../snippets/discordjsv12";
 
 const libraries = {
+  a: directExport,
   "dotnet_discord-net": discordnet,
   dotnet_dsharpplus: dsharpplus,
   dotnet_dsharpplusEmbedbuilder: dsharpplusEmbedbuilder,
@@ -32,15 +34,12 @@ const libraries = {
   java_jda: jda,
 };
 
-// TODO: check for localStorage availability?
-// are we ever going to run into a browser that supports flexbox but not localStorage?
-
 const LOCAL_STORAGE_KEY = "codegen_lib";
 
-const CodeModal = class extends React.Component {
+const ExportModal = class extends React.Component {
   generateState() {
     const keys = Object.keys(libraries);
-    let initial = keys[Math.floor(Math.random() * keys.length)];
+    let initial = keys[0];
 
     const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (stored) {
@@ -57,28 +56,32 @@ const CodeModal = class extends React.Component {
   }
 
   changeLibrary = (event) => {
-    localStorage.setItem("codegen_lang", event.target.value);
+    localStorage.setItem(LOCAL_STORAGE_KEY, event.target.value);
     this.setState({ library: event.target.value });
   };
 
   render() {
-    const { data, hasError, webhookMode, ...props } = this.props;
+    const { data, hasError, ...props } = this.props;
     let code =
       "Errors encountered when validating/parsing your data.\nCheck those first before trying to generate code.";
     let language = "accesslog";
 
     if (!hasError) {
       const lib = libraries[this.state.library];
-      if (webhookMode && !lib.webhook_support) {
+      if (data.webhookMode && !lib.webhook_support) {
         code = `${lib.name}, does not have webhook support yet!`;
       } else {
         language = lib.language;
-        code = lib.generateFrom(data, webhookMode);
+        code = lib.generateFrom(data, data.webhookMode);
       }
     }
 
     const theme = `atom-one-${this.props.darkTheme ? "dark" : "light"}`;
-    const highlightedBlock = hljs.highlight(language, code, true);
+    const highlightedBlock = hljs.highlight(
+      language != null ? language : "javascript",
+      code,
+      true
+    );
 
     return (
       <Modal title="Generate code" {...props} maxWidth="90ch">
@@ -120,7 +123,7 @@ const CodeModal = class extends React.Component {
 };
 
 function wrapper(props) {
-  return <CodeModal {...props} />;
+  return <ExportModal {...props} />;
 }
 
 export default wrapper;

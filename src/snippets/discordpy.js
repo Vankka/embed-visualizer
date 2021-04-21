@@ -1,5 +1,3 @@
-import Moment from "moment";
-
 function pythonKwargs(args) {
   return Object.keys(args)
     .reduce((kwargs, key) => {
@@ -28,11 +26,14 @@ export default {
       const result = [];
 
       if (item) {
-        // TODO: don't duplicate this kind of parsing
-        let timestamp = Moment(
+        let timestamp = new Date(
           item.timestamp !== undefined ? item.timestamp : null
         );
-        timestamp = timestamp.isValid() ? timestamp.unix() : null;
+        if (isNaN(timestamp.getTime())) {
+          timestamp = null;
+        } else {
+          timestamp = timestamp.getTime() / 1000;
+        }
 
         const args = {
           title: item.title ? JSON.stringify(item.title) : null,

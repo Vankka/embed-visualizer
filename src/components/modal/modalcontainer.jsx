@@ -1,14 +1,23 @@
 import React from "react";
-import ReactCSSTransitionGroup from "react-addons-css-transition-group";
+import { CSSTransition } from "react-transition-group";
 
 const ESC = 27;
 
 const ModalContainer = class extends React.Component {
   static defaultProps = {
     transitionName: "modal",
-    enterDuration: 190,
-    exitDuration: 190,
+    duration: 190,
   };
+
+  constructor(props) {
+    super(props);
+
+    this.onKeyDown = (event) => {
+      if (event.keyCode === ESC) {
+        props.close();
+      }
+    };
+  }
 
   componentDidMount() {
     document.addEventListener("keydown", this.onKeyDown);
@@ -16,12 +25,6 @@ const ModalContainer = class extends React.Component {
 
   componentWillUnmount() {
     document.removeEventListener("keydown", this.onKeyDown);
-  }
-
-  onKeyDown(event) {
-    if (event.keyCode === ESC) {
-      this.props.close();
-    }
   }
 
   render() {
@@ -37,7 +40,16 @@ const ModalContainer = class extends React.Component {
       </div>
     ) : null;
 
-    return content;
+    return content != null ? (
+      <CSSTransition
+        in={true}
+        classNames={this.props.transitionName}
+        timeout={this.props.duration}
+        unmountOnExit
+      >
+        {content}
+      </CSSTransition>
+    ) : null;
   }
 };
 

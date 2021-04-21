@@ -1,13 +1,14 @@
-import React from 'react';
-import Moment from 'moment';
-import { parseAllowLinks, parseEmbedTitle } from './markdown';
-import { extractRGB } from '../color';
+import React from "react";
+import { parseAllowLinks, parseEmbedTitle } from "./markdown";
+import { extractRGB } from "../color";
 
-
-const Link = ({ children, ...props}) => {
-  return <a target='_blank' rel='noreferrer' {...props}>{children}</a>;
+const Link = ({ children, ...props }) => {
+  return (
+    <a target="_blank" rel="noreferrer" {...props}>
+      {children}
+    </a>
+  );
 };
-
 
 const EmbedColorPill = ({ color }) => {
   let computed;
@@ -17,18 +18,22 @@ const EmbedColorPill = ({ color }) => {
     computed = `rgba(${c.r},${c.g},${c.b},1)`;
   }
 
-  const style = { backgroundColor: computed !== undefined ? computed : '' };
-  return <div className='embed-color-pill' style={style} />;
-}
+  const style = { backgroundColor: computed !== undefined ? computed : "" };
+  return <div className="embed-color-pill" style={style} />;
+};
 
 const EmbedTitle = ({ title, url }) => {
   if (!title) {
     return null;
   }
 
-  let computed = <div className='embed-title'>{parseEmbedTitle(title)}</div>;
+  let computed = <div className="embed-title">{parseEmbedTitle(title)}</div>;
   if (url) {
-    computed = <Link href={url} className='embed-title'>{parseEmbedTitle(title)}</Link>;
+    computed = (
+      <Link href={url} className="embed-title">
+        {parseEmbedTitle(title)}
+      </Link>
+    );
   }
 
   return computed;
@@ -39,7 +44,9 @@ const EmbedDescription = ({ content }) => {
     return null;
   }
 
-  return <div className='embed-description markup'>{parseAllowLinks(content)}</div>;
+  return (
+    <div className="embed-description markup">{parseAllowLinks(content)}</div>
+  );
 };
 
 const EmbedAuthor = ({ name, url, icon_url }) => {
@@ -49,15 +56,26 @@ const EmbedAuthor = ({ name, url, icon_url }) => {
 
   let authorName;
   if (name) {
-    authorName = <span className='embed-author-name'>{name}</span>;
+    authorName = <span className="embed-author-name">{name}</span>;
     if (url) {
-      authorName = <Link href={url} className='embed-author-name'>{name}</Link>;
+      authorName = (
+        <Link href={url} className="embed-author-name">
+          {name}
+        </Link>
+      );
     }
   }
 
-  const authorIcon = icon_url ? (<img src={icon_url} role='presentation' className='embed-author-icon' />) : null;
+  const authorIcon = icon_url ? (
+    <img src={icon_url} role="presentation" className="embed-author-icon" />
+  ) : null;
 
-  return <div className='embed-author'>{authorIcon}{authorName}</div>;
+  return (
+    <div className="embed-author">
+      {authorIcon}
+      {authorName}
+    </div>
+  );
 };
 
 const EmbedField = ({ name, value, inline }) => {
@@ -65,12 +83,21 @@ const EmbedField = ({ name, value, inline }) => {
     return null;
   }
 
-  const cls = 'embed-field' + (inline ? ' embed-field-inline' : '');
+  const cls = "embed-field" + (inline ? " embed-field-inline" : "");
 
-  const fieldName = name ? (<div className='embed-field-name'>{parseEmbedTitle(name)}</div>) : null;
-  const fieldValue = value ? (<div className='embed-field-value markup'>{parseAllowLinks(value)}</div>) : null;
+  const fieldName = name ? (
+    <div className="embed-field-name">{parseEmbedTitle(name)}</div>
+  ) : null;
+  const fieldValue = value ? (
+    <div className="embed-field-value markup">{parseAllowLinks(value)}</div>
+  ) : null;
 
-  return <div className={cls}>{fieldName}{fieldValue}</div>;
+  return (
+    <div className={cls}>
+      {fieldName}
+      {fieldValue}
+    </div>
+  );
 };
 
 const EmbedThumbnail = ({ url }) => {
@@ -81,8 +108,8 @@ const EmbedThumbnail = ({ url }) => {
   return (
     <img
       src={url}
-      role='presentation'
-      className='embed-rich-thumb'
+      role="presentation"
+      className="embed-rich-thumb"
       style={{ maxWidth: 80, maxHeight: 80 }}
     />
   );
@@ -95,7 +122,11 @@ const EmbedImage = ({ url }) => {
 
   // NOTE: for some reason it's a link in the original DOM
   // not sure if this breaks the styling, probably does
-  return <a className='embed-thumbnail embed-thumbnail-rich'><img className='image' role='presentation' src={url} /></a>;
+  return (
+    <a className="embed-thumbnail embed-thumbnail-rich">
+      <img className="image" role="presentation" src={url} />
+    </a>
+  );
 };
 
 const EmbedFooter = ({ timestamp, text, icon_url }) => {
@@ -104,15 +135,56 @@ const EmbedFooter = ({ timestamp, text, icon_url }) => {
   }
 
   // pass null, since undefined will make moment(...) return the current date/time
-  let time = Moment(timestamp !== undefined ? timestamp : null);
-  time = time.isValid() ? time.format('ddd MMM Do, YYYY [at] h:mm A') : null;
+  timestamp = timestamp !== undefined ? new Date(timestamp) : new Date();
+  let time;
+  if (isNaN(timestamp.getTime())) {
+    time = null;
+  } else {
+    let today = new Date();
+    let monthAndYearMatch =
+      timestamp.getMonth() === today.getMonth() &&
+      timestamp.getFullYear() === today.getFullYear();
 
-  const footerText = [text, time].filter(Boolean).join(' | ');
-  const footerIcon = text && icon_url ? (
-    <img src={icon_url} className='embed-footer-icon' role='presentation' width='20' height='20' />
-  ) : null;
+    let relativeDate = null;
+    if (timestamp.getDate() === today.getDate() && monthAndYearMatch) {
+      relativeDate = "Today";
+    } else if (
+      timestamp.getDate() === today.getDate() - 1 &&
+      monthAndYearMatch
+    ) {
+      relativeDate = "Yesterday";
+    }
+    if (relativeDate !== null) {
+      time =
+        relativeDate +
+        " at " +
+        timestamp.toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+    } else {
+      time = timestamp.toLocaleDateString();
+    }
+  }
 
-  return <div>{footerIcon}<span className='embed-footer'>{footerText}</span></div>;
+  const footerText = [text, time].filter(Boolean).join(" | ");
+  const footerIcon =
+    text && icon_url ? (
+      <img
+        src={icon_url}
+        className="embed-footer-icon"
+        role="presentation"
+        width="20"
+        height="20"
+      />
+    ) : null;
+
+  return (
+    <div>
+      {footerIcon}
+      <span className="embed-footer">{footerText}</span>
+    </div>
+  );
 };
 
 const EmbedFields = ({ fields }) => {
@@ -120,19 +192,34 @@ const EmbedFields = ({ fields }) => {
     return null;
   }
 
-  return <div className='embed-fields'>{fields.map((f, i) => <EmbedField key={i} {...f} />)}</div>;
+  return (
+    <div className="embed-fields">
+      {fields.map((f, i) => (
+        <EmbedField key={i} {...f} />
+      ))}
+    </div>
+  );
 };
 
 const Embed = ({
-  color, author, title, url, description, fields, thumbnail, image, timestamp, footer
+  color,
+  author,
+  title,
+  url,
+  description,
+  fields,
+  thumbnail,
+  image,
+  timestamp,
+  footer,
 }) => {
   return (
-    <div className='accessory'>
-      <div className='embed-wrapper'>
+    <div className="accessory">
+      <div className="embed-wrapper">
         <EmbedColorPill color={color} />
-        <div className='embed embed-rich'>
-          <div className='embed-content'>
-            <div className='embed-content-inner'>
+        <div className="embed embed-rich">
+          <div className="embed-content">
+            <div className="embed-content-inner">
               <EmbedAuthor {...author} />
               <EmbedTitle title={title} url={url} />
               <EmbedDescription content={description} />
@@ -147,6 +234,5 @@ const Embed = ({
     </div>
   );
 };
-
 
 export default Embed;

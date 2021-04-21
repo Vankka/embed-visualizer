@@ -1,8 +1,10 @@
 import React from "react";
-import Moment from "moment";
 import Embed from "./embed";
 import { parse, parseAllowLinks, jumboify } from "./markdown";
 import Invite from "./invite";
+
+import "../css/discord.css";
+import "highlight.js/styles/solarized-dark.css";
 
 const INVITE_REGEX = /discord(?:(?:app)?\.com\/invite|\.gg(?:\/invite)?)\/([\w-]{2,255})/gi;
 
@@ -22,11 +24,15 @@ const MessageTimestamp = class extends React.Component {
   };
 
   render() {
-    const { compactMode } = this.props;
-    const m = Moment();
-    const computed = compactMode ? m.format("LT") : m.calendar();
+    let time = new Date().toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    if (!this.props.compactMode) {
+      time = "Today at " + time;
+    }
 
-    return <span className="timestamp">{computed}</span>;
+    return <span className="timestamp">{time}</span>;
   }
 };
 
@@ -90,18 +96,6 @@ const Avatar = ({ compactMode, url }) => {
   );
 };
 
-const ErrorHeader = ({ error }) => {
-  if (!error) {
-    return null;
-  }
-
-  return (
-    <header className="f6 bg-red br2 pa2 br--top w-100 code pre-wrap">
-      {error}
-    </header>
-  );
-};
-
 const DiscordViewWrapper = ({ darkTheme, children }) => {
   // yikes
   // we could actually just flatten the styling out on the respective elements,
@@ -141,7 +135,6 @@ const DiscordView = class extends React.Component {
       webhookMode,
       username,
       avatar_url,
-      error,
       data: { content, embed, embeds },
     } = this.props;
 
@@ -157,7 +150,6 @@ const DiscordView = class extends React.Component {
 
     return (
       <div className={cls}>
-        <ErrorHeader error={error} />
         <DiscordViewWrapper darkTheme={darkTheme}>
           <div
             className={`message-group hide-overflow ${
@@ -194,7 +186,7 @@ const DiscordView = class extends React.Component {
                         key={e.key}
                         inviteCode={e}
                         isLightMode={!darkTheme}
-                      ></Invite>
+                      />
                     ))}
                   </div>
                 ) : null}

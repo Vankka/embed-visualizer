@@ -48,7 +48,7 @@ const CodeMirror = class extends React.Component {
     }
   }
 
-  componentWillReceiveProps(next) {
+  UNSAFE_componentWillReceiveProps(next) {
     if (
       this.instance &&
       next.value !== undefined &&
