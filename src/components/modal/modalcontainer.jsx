@@ -2,18 +2,22 @@ import React from "react";
 import { CSSTransition } from "react-transition-group";
 
 const ESC = 27;
+const ENTER = 13;
 
 const ModalContainer = class extends React.Component {
   static defaultProps = {
     transitionName: "modal",
     duration: 190,
+    exitButtons: [ESC],
   };
 
   constructor(props) {
     super(props);
 
     this.onKeyDown = (event) => {
-      if (event.keyCode === ESC) {
+      console.log(event.keyCode);
+      console.log(props.exitButtons.indexOf(event.keyCode));
+      if (this.props.exitButtons.indexOf(event.keyCode) !== -1) {
         props.close();
       }
     };
@@ -53,4 +57,5 @@ const ModalContainer = class extends React.Component {
   }
 };
 
+export { ESC, ENTER };
 export default ModalContainer;

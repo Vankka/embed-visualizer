@@ -15,6 +15,7 @@ const App = class extends React.Component {
       darkTheme: true,
       compactMode: false,
       modal: null,
+      modalProps: {},
       data: {},
     };
   }
@@ -27,7 +28,6 @@ const App = class extends React.Component {
             <Editor
               data={this.state.data}
               setData={(data) => this.setState({ data: data })}
-              editorDarkTheme={this.state.darkTheme}
               darkTheme={this.state.darkTheme}
               setDarkTheme={(value) => this.setState({ darkTheme: value })}
               compactMode={this.state.compactMode}
@@ -35,7 +35,10 @@ const App = class extends React.Component {
               import={() => this.setState({ modal: ImportModal })}
               export={() => this.setState({ modal: ExportModal })}
               save={null}
-              setModal={(modal) => this.setState({ modal: modal })}
+              editorDarkTheme={this.state.darkTheme}
+              setModal={(modal, props) =>
+                this.setState({ modal: modal, modalProps: props })
+              }
             />
 
             <footer className="w-100 pa3 tc white" />
@@ -44,11 +47,12 @@ const App = class extends React.Component {
 
         <ModalContainer
           currentModal={this.state.modal}
+          close={() => this.setState({ modal: null })}
           darkTheme={this.state.darkTheme}
           data={this.state.data}
           setData={(data) => this.setState({ data: data })}
           webhookMode={false}
-          close={() => this.setState({ modal: null })}
+          {...this.state.modalProps}
         />
       </div>
     );

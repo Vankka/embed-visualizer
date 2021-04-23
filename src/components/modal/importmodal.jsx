@@ -69,7 +69,13 @@ const initialCode = JSON.stringify(
 
 const ImportModal = function (props) {
   return (
-    <Modal title="Import" maxWidth="90ch" maxHeight="90%" {...props}>
+    <Modal
+      title="Import"
+      minWidth="90ch"
+      maxWidth="90ch"
+      maxHeight="90%"
+      {...props}
+    >
       <div
         className={
           "vh-100 h-auto-l w-100 w-100-l " +

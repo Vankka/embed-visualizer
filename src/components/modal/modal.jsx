@@ -1,7 +1,12 @@
 import React from "react";
 
 const Modal = class extends React.Component {
-  static defaultProps = { maxWidth: "60vw", maxHeight: "90vh" };
+  static defaultProps = {
+    minWidth: "10vw",
+    minHeight: "10vh",
+    maxWidth: "60vw",
+    maxHeight: "90vh",
+  };
 
   componentDidMount() {
     document.body.style.overflow = "hidden";
@@ -15,6 +20,8 @@ const Modal = class extends React.Component {
       "z-1 inner shadow-3 br2 overflow-hidden flex flex-column open-sans";
 
     const style = {
+      minWidth: this.props.minWidth,
+      minHeight: this.props.minHeight,
       maxWidth: this.props.maxWidth,
       maxHeight: this.props.maxHeight,
     };

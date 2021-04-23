@@ -12,6 +12,8 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import DiscordView from "./discordview";
 import AboutModal from "./modal/aboutmodal";
+import CustomModal from "./modal/custommodal";
+import { ENTER, ESC } from "./modal/modalcontainer";
 
 const InputTextColorContext = React.createContext("black");
 
@@ -37,6 +39,11 @@ function TextInput(props) {
             border: "none",
             color: value,
             borderBottom: "solid 1px gray",
+          }}
+          ref={(input) => {
+            if (props.autofocus && input !== null) {
+              input.focus();
+            }
           }}
         />
       )}
@@ -68,6 +75,10 @@ function ParagraphInput(props) {
 const Editor = class extends React.Component {
   constructor(props) {
     super(props);
+
+    this.state = {
+      temporaryValue: "",
+    };
   }
 
   render() {
@@ -149,9 +160,13 @@ const Editor = class extends React.Component {
                 let thisIndex = index++;
                 if (embeds.length === 1) {
                 }
+                let author = embed.author === undefined ? {} : embed.author;
+                let image = embed.image === undefined ? {} : embed.image;
                 return (
                   <div key={thisIndex}>
-                    <h3></h3>
+                    <h3>
+                      Embed {embeds.length === 1 ? "" : "#" + (thisIndex + 1)}
+                    </h3>
                     <table>
                       <thead />
                       <tbody>
@@ -181,8 +196,47 @@ const Editor = class extends React.Component {
                             <div
                               style={{ display: "flex", marginBottom: "10px" }}
                             >
-                              <IconButton click={() => {}} icon={faLink} />
-                              <IconButton click={() => {}} icon={faImage} />
+                              <IconButton
+                                click={() => {
+                                  this.props.setModal(CustomModal, {
+                                    exitButtons: [ESC, ENTER],
+                                    title: "Set the Title URL",
+                                    children: () => (
+                                      <TextInput
+                                        autofocus={true}
+                                        value={embed.url}
+                                        change={(value) => {
+                                          data.embeds[thisIndex]["url"] = value;
+                                          this.props.setData(data);
+                                        }}
+                                      />
+                                    ),
+                                  });
+                                }}
+                                icon={faLink}
+                              />
+                              <IconButton
+                                click={() => {
+                                  this.props.setModal(CustomModal, {
+                                    exitButtons: [ESC, ENTER],
+                                    title: "Set the Title Icon URL",
+                                    children: () => (
+                                      <TextInput
+                                        autofocus={true}
+                                        value={image.url}
+                                        change={(value) => {
+                                          image.url = value;
+                                          data.embeds[thisIndex][
+                                            "image"
+                                          ] = image;
+                                          this.props.setData(data);
+                                        }}
+                                      />
+                                    ),
+                                  });
+                                }}
+                                icon={faImage}
+                              />
                             </div>
                           </td>
                         </tr>
@@ -191,10 +245,38 @@ const Editor = class extends React.Component {
                             <label htmlFor="authortext">Author</label>&nbsp;
                           </td>
                           <td>
-                            <TextInput id="authortext" change={(value) => {}} />
+                            <TextInput
+                              id="authortext"
+                              change={(value) => {
+                                author.name = value;
+                                data.embeds[thisIndex]["author"] = author;
+                                this.props.setData(data);
+                              }}
+                            />
                           </td>
                           <td>
-                            <IconButton click={() => {}} icon={faLink} />
+                            <IconButton
+                              click={() => {
+                                this.props.setModal(CustomModal, {
+                                  exitButtons: [ESC, ENTER],
+                                  title: "Set the Author URL",
+                                  children: () => (
+                                    <TextInput
+                                      autofocus={true}
+                                      value={author.url}
+                                      change={(value) => {
+                                        author.url = value;
+                                        data.embeds[thisIndex][
+                                          "author"
+                                        ] = author;
+                                        this.props.setData(data);
+                                      }}
+                                    />
+                                  ),
+                                });
+                              }}
+                              icon={faLink}
+                            />
                           </td>
                         </tr>
                         <tr></tr>
