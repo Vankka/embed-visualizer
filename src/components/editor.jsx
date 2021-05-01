@@ -9,11 +9,13 @@ import {
   fas,
   faSave,
   faUpload,
+  faPalette,
 } from "@fortawesome/free-solid-svg-icons";
 import DiscordView from "./discordview";
 import AboutModal from "./modal/aboutmodal";
 import CustomModal from "./modal/custommodal";
 import { ENTER, ESC } from "./modal/modalcontainer";
+import { SketchPicker } from "react-color";
 
 const InputTextColorContext = React.createContext("black");
 
@@ -30,21 +32,20 @@ function TextInput(props) {
     <InputTextColorContext.Consumer>
       {(value) => (
         <input
-          id={props.id}
           type="text"
-          value={props.value}
-          onChange={(event) => props.change(event.target.value)}
           style={{
             backgroundColor: "transparent",
             border: "none",
             color: value,
             borderBottom: "solid 1px gray",
+            width: "100%",
           }}
           ref={(input) => {
             if (props.autofocus && input !== null) {
               input.focus();
             }
           }}
+          {...props}
         />
       )}
     </InputTextColorContext.Consumer>
@@ -56,16 +57,15 @@ function ParagraphInput(props) {
     <InputTextColorContext.Consumer>
       {(value) => (
         <textarea
-          id={props.id}
-          value={props.value}
-          onChange={(event) => props.change(event.target.value)}
           style={{
             backgroundColor: "transparent",
             border: "none",
             borderBottom: "solid 1px gray",
             color: value,
             resize: "vertical",
+            width: "100%",
           }}
+          {...props}
         />
       )}
     </InputTextColorContext.Consumer>
@@ -90,7 +90,12 @@ const Editor = class extends React.Component {
 
     let embeds = data.embeds;
     if (embeds === undefined || embeds === null || embeds.length === 0) {
-      embeds = [{}];
+      let embed = data.embed;
+      if (embed !== undefined && embed) {
+        embeds = [embed];
+      } else {
+        embeds = [{}];
+      }
       data.embeds = embeds;
     }
     let index = 0;
@@ -149,9 +154,10 @@ const Editor = class extends React.Component {
               <h3>Content</h3>
               <ParagraphInput
                 id="messagecontent"
-                value={data.content}
-                change={(value) => {
-                  data.content = value;
+                defaultValue={data.content}
+                maxLength={2000}
+                onChange={(event) => {
+                  data.content = event.target.value;
                   this.props.setData(data);
                 }}
               />
@@ -162,6 +168,8 @@ const Editor = class extends React.Component {
                 }
                 let author = embed.author === undefined ? {} : embed.author;
                 let image = embed.image === undefined ? {} : embed.image;
+                let thumbnail =
+                  embed.thumbnail === undefined ? {} : embed.thumbnail;
                 return (
                   <div key={thisIndex}>
                     <h3>
@@ -172,84 +180,16 @@ const Editor = class extends React.Component {
                       <tbody>
                         <tr>
                           <td>
-                            <label htmlFor="messagecontent">Content</label>
-                          </td>
-                          <td></td>
-                          <td style={{ width: "100%" }} />
-                        </tr>
-                        <tr>
-                          <td>
                             <label htmlFor="titletext">Title</label>
                           </td>
-                          <td>
+                          <td style={{ width: "100%" }}>
                             <TextInput
                               id="titletext"
-                              value={embed.title}
-                              change={(value) => {
-                                embed.title = value;
+                              defaultValue={embed.title}
+                              maxLength="256"
+                              onChange={(event) => {
+                                embed.title = event.target.value;
                                 data.embeds[thisIndex] = embed;
-                                this.props.setData(data);
-                              }}
-                            />
-                          </td>
-                          <td>
-                            <div
-                              style={{ display: "flex", marginBottom: "10px" }}
-                            >
-                              <IconButton
-                                click={() => {
-                                  this.props.setModal(CustomModal, {
-                                    exitButtons: [ESC, ENTER],
-                                    title: "Set the Title URL",
-                                    children: () => (
-                                      <TextInput
-                                        autofocus={true}
-                                        value={embed.url}
-                                        change={(value) => {
-                                          data.embeds[thisIndex]["url"] = value;
-                                          this.props.setData(data);
-                                        }}
-                                      />
-                                    ),
-                                  });
-                                }}
-                                icon={faLink}
-                              />
-                              <IconButton
-                                click={() => {
-                                  this.props.setModal(CustomModal, {
-                                    exitButtons: [ESC, ENTER],
-                                    title: "Set the Title Icon URL",
-                                    children: () => (
-                                      <TextInput
-                                        autofocus={true}
-                                        value={image.url}
-                                        change={(value) => {
-                                          image.url = value;
-                                          data.embeds[thisIndex][
-                                            "image"
-                                          ] = image;
-                                          this.props.setData(data);
-                                        }}
-                                      />
-                                    ),
-                                  });
-                                }}
-                                icon={faImage}
-                              />
-                            </div>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <label htmlFor="authortext">Author</label>&nbsp;
-                          </td>
-                          <td>
-                            <TextInput
-                              id="authortext"
-                              change={(value) => {
-                                author.name = value;
-                                data.embeds[thisIndex]["author"] = author;
                                 this.props.setData(data);
                               }}
                             />
@@ -259,13 +199,54 @@ const Editor = class extends React.Component {
                               click={() => {
                                 this.props.setModal(CustomModal, {
                                   exitButtons: [ESC, ENTER],
+                                  title: "Set the Title URL",
+                                  children: () => (
+                                    <TextInput
+                                      autoFocus={true}
+                                      defaultValue={embed.url}
+                                      maxLength="2000"
+                                      onChange={(event) => {
+                                        data.embeds[thisIndex]["url"] =
+                                          event.target.value;
+                                        this.props.setData(data);
+                                      }}
+                                    />
+                                  ),
+                                });
+                              }}
+                              icon={faLink}
+                            />
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <label htmlFor="authorname">Author</label>
+                          </td>
+                          <td>
+                            <TextInput
+                              id="authorname"
+                              maxLength="256"
+                              defaultValue={author.name}
+                              onChange={(event) => {
+                                author.name = event.target.value;
+                                data.embeds[thisIndex]["author"] = author;
+                                this.props.setData(data);
+                              }}
+                            />
+                          </td>
+                          <td style={{ display: "flex", marginBottom: "10px" }}>
+                            <IconButton
+                              click={() => {
+                                this.props.setModal(CustomModal, {
+                                  exitButtons: [ESC, ENTER],
                                   title: "Set the Author URL",
                                   children: () => (
                                     <TextInput
-                                      autofocus={true}
-                                      value={author.url}
-                                      change={(value) => {
-                                        author.url = value;
+                                      autoFocus={true}
+                                      defaultValue={author.url}
+                                      maxLength="2000"
+                                      onChange={(event) => {
+                                        author.url = event.target.value;
                                         data.embeds[thisIndex][
                                           "author"
                                         ] = author;
@@ -277,9 +258,149 @@ const Editor = class extends React.Component {
                               }}
                               icon={faLink}
                             />
+                            <IconButton
+                              click={() => {
+                                this.props.setModal(CustomModal, {
+                                  exitButtons: [ESC, ENTER],
+                                  title: "Set the Author Icon URL",
+                                  children: () => (
+                                    <TextInput
+                                      autoFocus={true}
+                                      defaultValue={author.icon_url}
+                                      maxLength="2000"
+                                      onChange={(event) => {
+                                        author.icon_url = event.target.value;
+                                        data.embeds[thisIndex][
+                                          "author"
+                                        ] = author;
+                                        this.props.setData(data);
+                                      }}
+                                    />
+                                  ),
+                                });
+                              }}
+                              icon={faImage}
+                            />
                           </td>
                         </tr>
-                        <tr></tr>
+                        <tr>
+                          <td>
+                            <label htmlFor="description">Description</label>
+                          </td>
+                          <td>
+                            <ParagraphInput
+                              id="description"
+                              defaultValue={embed.description}
+                              maxLength={2048}
+                              onChange={(event) => {
+                                data.embeds[thisIndex]["description"] =
+                                  event.target.value;
+                                this.props.setData(data);
+                              }}
+                            />
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style={{ verticalAlign: "center" }}>
+                            <label style={{ margin: 0 }}>Image URL</label>
+                          </td>
+                          <td>
+                            <IconButton
+                              click={() => {
+                                this.props.setModal(CustomModal, {
+                                  exitButtons: [ESC, ENTER],
+                                  title: "Set the embed Image URL",
+                                  children: () => (
+                                    <TextInput
+                                      autofocus={true}
+                                      defaultValue={image.url}
+                                      maxLength="2000"
+                                      onChange={(event) => {
+                                        image.url = event.target.value;
+                                        data.embeds[thisIndex]["image"] = image;
+                                        this.props.setData(data);
+                                      }}
+                                    />
+                                  ),
+                                });
+                              }}
+                              icon={faImage}
+                            />
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <label>Thumbnail URL</label>
+                          </td>
+                          <td>
+                            <IconButton
+                              click={() => {
+                                this.props.setModal(CustomModal, {
+                                  exitButtons: [ESC, ENTER],
+                                  title: "Set the embed Thumbnail URL",
+                                  children: () => (
+                                    <TextInput
+                                      autofocus={true}
+                                      defaultValue={thumbnail.url}
+                                      maxLength="2000"
+                                      onChange={(event) => {
+                                        image.url = event.target.value;
+                                        data.embeds[thisIndex][
+                                          "thumbnail"
+                                        ] = image;
+                                        this.props.setData(data);
+                                      }}
+                                    />
+                                  ),
+                                });
+                              }}
+                              icon={faImage}
+                            />
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <label>Color</label>
+                          </td>
+                          <td>
+                            <IconButton
+                              click={() => {
+                                this.props.setModal(CustomModal, {
+                                  exitButtons: [ESC, ENTER],
+                                  title: "Set the embed Color",
+                                  children: () => (
+                                    <SketchPicker
+                                      color={embed.color}
+                                      onChange={(color) => {
+                                        data.embeds[thisIndex]["color"] =
+                                          color.rgb;
+                                        this.props.setData(data);
+                                      }}
+                                      disableAlpha={true}
+                                    />
+                                  ),
+                                });
+                              }}
+                              icon={faPalette}
+                            />
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <label htmlFor="timestamp">Timestamp</label>
+                          </td>
+                          <td style={{ width: "100%" }}>
+                            <TextInput
+                              id="timestamp"
+                              defaultValue={embed.timestamp}
+                              onChange={(event) => {
+                                data.embeds[thisIndex]["timestamp"] =
+                                  event.target.value;
+                                this.props.setData(data);
+                              }}
+                            />
+                          </td>
+                        </tr>
                       </tbody>
                     </table>
                   </div>

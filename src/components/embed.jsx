@@ -1,6 +1,5 @@
 import React from "react";
 import { parseAllowLinks, parseEmbedTitle } from "./markdown";
-import { extractRGB } from "../color";
 
 const Link = ({ children, ...props }) => {
   return (
@@ -14,8 +13,7 @@ const EmbedColorPill = ({ color }) => {
   let computed;
 
   if (color) {
-    const c = extractRGB(color);
-    computed = `rgba(${c.r},${c.g},${c.b},1)`;
+    computed = `rgba(${color.r},${color.g},${color.b},1)`;
   }
 
   const style = { backgroundColor: computed !== undefined ? computed : "" };
