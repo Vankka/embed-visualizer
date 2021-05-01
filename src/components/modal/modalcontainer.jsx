@@ -15,8 +15,6 @@ const ModalContainer = class extends React.Component {
     super(props);
 
     this.onKeyDown = (event) => {
-      console.log(event.keyCode);
-      console.log(props.exitButtons.indexOf(event.keyCode));
       if (this.props.exitButtons.indexOf(event.keyCode) !== -1) {
         props.close();
       }
@@ -44,16 +42,16 @@ const ModalContainer = class extends React.Component {
       </div>
     ) : null;
 
-    return content != null ? (
+    return (
       <CSSTransition
-        in={true}
+        in={content != null}
         classNames={this.props.transitionName}
         timeout={this.props.duration}
         unmountOnExit
       >
-        {content}
+        {content != null ? content : <div />}
       </CSSTransition>
-    ) : null;
+    );
   }
 };
 
