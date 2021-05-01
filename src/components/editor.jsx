@@ -16,6 +16,7 @@ import AboutModal from "./modal/aboutmodal";
 import CustomModal from "./modal/custommodal";
 import { ENTER, ESC } from "./modal/modalcontainer";
 import { SketchPicker } from "react-color";
+import { combineRGB } from "../color";
 
 const InputTextColorContext = React.createContext("black");
 
@@ -89,16 +90,26 @@ const Editor = class extends React.Component {
     let data = this.props.data;
 
     let embeds = data.embeds;
+    let singleEmbed = false;
     if (embeds === undefined || embeds === null || embeds.length === 0) {
       let embed = data.embed;
       if (embed !== undefined && embed) {
+        singleEmbed = true;
         embeds = [embed];
       } else {
         embeds = [{}];
       }
-      data.embeds = embeds;
     }
-    let index = 0;
+
+    const setData = (data) => this.props.setData(data);
+    const setEmbeds = (embeds) => {
+      if (singleEmbed) {
+        data.embed = embeds[0];
+      } else {
+        data.embeds = embeds;
+      }
+      setData(data);
+    };
 
     return (
       <section className="flex-l flex-auto">
@@ -158,14 +169,11 @@ const Editor = class extends React.Component {
                 maxLength={2000}
                 onChange={(event) => {
                   data.content = event.target.value;
-                  this.props.setData(data);
+                  setData(data);
                 }}
               />
 
-              {embeds.map((embed) => {
-                let thisIndex = index++;
-                if (embeds.length === 1) {
-                }
+              {embeds.map((embed, thisIndex) => {
                 let author = embed.author === undefined ? {} : embed.author;
                 let image = embed.image === undefined ? {} : embed.image;
                 let thumbnail =
@@ -189,8 +197,8 @@ const Editor = class extends React.Component {
                               maxLength="256"
                               onChange={(event) => {
                                 embed.title = event.target.value;
-                                data.embeds[thisIndex] = embed;
-                                this.props.setData(data);
+                                embeds[thisIndex] = embed;
+                                setEmbeds(embeds);
                               }}
                             />
                           </td>
@@ -206,9 +214,9 @@ const Editor = class extends React.Component {
                                       defaultValue={embed.url}
                                       maxLength="2000"
                                       onChange={(event) => {
-                                        data.embeds[thisIndex]["url"] =
+                                        embeds[thisIndex]["url"] =
                                           event.target.value;
-                                        this.props.setData(data);
+                                        setEmbeds(embeds);
                                       }}
                                     />
                                   ),
@@ -229,8 +237,8 @@ const Editor = class extends React.Component {
                               defaultValue={author.name}
                               onChange={(event) => {
                                 author.name = event.target.value;
-                                data.embeds[thisIndex]["author"] = author;
-                                this.props.setData(data);
+                                embeds[thisIndex]["author"] = author;
+                                setEmbeds(embeds);
                               }}
                             />
                           </td>
@@ -247,10 +255,8 @@ const Editor = class extends React.Component {
                                       maxLength="2000"
                                       onChange={(event) => {
                                         author.url = event.target.value;
-                                        data.embeds[thisIndex][
-                                          "author"
-                                        ] = author;
-                                        this.props.setData(data);
+                                        embeds[thisIndex]["author"] = author;
+                                        setEmbeds(embeds);
                                       }}
                                     />
                                   ),
@@ -270,10 +276,8 @@ const Editor = class extends React.Component {
                                       maxLength="2000"
                                       onChange={(event) => {
                                         author.icon_url = event.target.value;
-                                        data.embeds[thisIndex][
-                                          "author"
-                                        ] = author;
-                                        this.props.setData(data);
+                                        embeds[thisIndex]["author"] = author;
+                                        setEmbeds(embeds);
                                       }}
                                     />
                                   ),
@@ -293,9 +297,9 @@ const Editor = class extends React.Component {
                               defaultValue={embed.description}
                               maxLength={2048}
                               onChange={(event) => {
-                                data.embeds[thisIndex]["description"] =
+                                embeds[thisIndex]["description"] =
                                   event.target.value;
-                                this.props.setData(data);
+                                setEmbeds(embeds);
                               }}
                             />
                           </td>
@@ -312,13 +316,13 @@ const Editor = class extends React.Component {
                                   title: "Set the embed Image URL",
                                   children: () => (
                                     <TextInput
-                                      autofocus={true}
+                                      autoFocus={true}
                                       defaultValue={image.url}
                                       maxLength="2000"
                                       onChange={(event) => {
                                         image.url = event.target.value;
-                                        data.embeds[thisIndex]["image"] = image;
-                                        this.props.setData(data);
+                                        embeds[thisIndex]["image"] = image;
+                                        setEmbeds(embeds);
                                       }}
                                     />
                                   ),
@@ -340,15 +344,15 @@ const Editor = class extends React.Component {
                                   title: "Set the embed Thumbnail URL",
                                   children: () => (
                                     <TextInput
-                                      autofocus={true}
+                                      autoFocus={true}
                                       defaultValue={thumbnail.url}
                                       maxLength="2000"
                                       onChange={(event) => {
-                                        image.url = event.target.value;
-                                        data.embeds[thisIndex][
+                                        thumbnail.url = event.target.value;
+                                        embeds[thisIndex][
                                           "thumbnail"
-                                        ] = image;
-                                        this.props.setData(data);
+                                        ] = thumbnail;
+                                        setEmbeds(embeds);
                                       }}
                                     />
                                   ),
@@ -372,9 +376,10 @@ const Editor = class extends React.Component {
                                     <SketchPicker
                                       color={embed.color}
                                       onChange={(color) => {
-                                        data.embeds[thisIndex]["color"] =
-                                          color.rgb;
-                                        this.props.setData(data);
+                                        embeds[thisIndex]["color"] = combineRGB(
+                                          color.rgb
+                                        );
+                                        setEmbeds(embeds);
                                       }}
                                       disableAlpha={true}
                                     />
@@ -394,9 +399,9 @@ const Editor = class extends React.Component {
                               id="timestamp"
                               defaultValue={embed.timestamp}
                               onChange={(event) => {
-                                data.embeds[thisIndex]["timestamp"] =
+                                embeds[thisIndex]["timestamp"] =
                                   event.target.value;
-                                this.props.setData(data);
+                                setEmbeds(embeds);
                               }}
                             />
                           </td>

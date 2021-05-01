@@ -32,8 +32,12 @@ const App = class extends React.Component {
               setDarkTheme={(value) => this.setState({ darkTheme: value })}
               compactMode={this.state.compactMode}
               setCompactMode={(value) => this.setState({ compactMode: value })}
-              import={() => this.setState({ modal: ImportModal })}
-              export={() => this.setState({ modal: ExportModal })}
+              import={() =>
+                this.setState({ modal: ImportModal, modalProps: [] })
+              }
+              export={() =>
+                this.setState({ modal: ExportModal, modalProps: [] })
+              }
               save={null}
               editorDarkTheme={this.state.darkTheme}
               setModal={(modal, props) =>

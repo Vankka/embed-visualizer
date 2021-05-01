@@ -139,14 +139,6 @@ class Inner extends React.Component {
 
     let data = isValid ? parsed : this.state.data;
 
-    let embedColor = { r: 0, g: 0, b: 0 };
-    if (webhookMode && isValid && data.embeds && data.embeds[0]) {
-      embedColor = extractRGB(data.embeds[0].color);
-    } else if (!webhookMode && isValid && data.embed) {
-      embedColor = extractRGB(data.embed.color);
-    }
-    data.embedColor = embedColor;
-
     // we set all these here to avoid some re-renders.
     // maybe it's okay (and if we ever want to
     // debounce validation, we need to take some of these out)
@@ -163,13 +155,15 @@ class Inner extends React.Component {
 
   render() {
     return (
-      <div>
+      <div style={{ height: "100%" }}>
         <ErrorHeader error={this.state.error} />
-        <CodeMirror
-          onChange={this.onCodeChange}
-          value={this.state.input}
-          theme={this.props.darkTheme ? "one-dark" : "default"}
-        />
+        <div style={{ overflowY: "auto", height: "65vh" }}>
+          <CodeMirror
+            onChange={this.onCodeChange}
+            value={this.state.input}
+            theme={this.props.darkTheme ? "one-dark" : "default"}
+          />
+        </div>
 
         <button
           onClick={() => {
