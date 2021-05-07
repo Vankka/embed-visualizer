@@ -181,15 +181,113 @@ const Editor = class extends React.Component {
                 let image = embed.image === undefined ? {} : embed.image;
                 let thumbnail =
                   embed.thumbnail === undefined ? {} : embed.thumbnail;
+                let fields = embed.fields === undefined ? [] : embed.fields;
+
+                let openFieldEditor = (existingField, index) => {
+                  let newField = existingField === undefined;
+                  let field = newField
+                    ? { name: "", value: "", inline: true }
+                    : existingField;
+
+                  let updateFields = (field, click) => {
+                    if (newField) {
+                      if (!click) {
+                        return;
+                      }
+                      fields.push(field);
+                    } else {
+                      fields[index] = field;
+                    }
+                    embeds[thisIndex]["fields"] = fields;
+                    setEmbeds(embeds);
+                  };
+
+                  this.props.setModal(CustomModal, {
+                    title: newField
+                      ? "Create a field"
+                      : "Alter field properties",
+                    maxHeight: "90vh",
+                    minWidth: "20em",
+                    children: (props) => {
+                      return (
+                        <div className="fieldsgrid-modal">
+                          <div>
+                            <label>
+                              Name
+                              <TextInput
+                                defaultValue={field.name}
+                                maxLength="256"
+                                onChange={(event) => {
+                                  field.name = event.target.value;
+                                  updateFields(field);
+                                }}
+                              />
+                            </label>
+                          </div>
+
+                          <div>
+                            <label>
+                              Value
+                              <ParagraphInput
+                                defaultValue={field.value}
+                                maxLength="2000"
+                                onChange={(event) => {
+                                  field.value = event.target.value;
+                                  updateFields(field);
+                                }}
+                              />
+                            </label>
+                          </div>
+
+                          <div>
+                            <label>
+                              <input
+                                type="checkbox"
+                                onChange={(event) => {
+                                  field.inline = event.target.checked;
+                                  updateFields(field);
+                                }}
+                              />
+                              &nbsp;Inline
+                            </label>
+                            &nbsp;
+                            {newField ? (
+                              <button
+                                onClick={() => {
+                                  updateFields(field, true);
+                                  props.close();
+                                }}
+                              >
+                                Create
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => {
+                                  fields.splice(index, 1);
+                                  embeds[thisIndex]["fields"] = fields;
+                                  setEmbeds(embeds);
+                                  props.close();
+                                }}
+                              >
+                                Remove
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    },
+                  });
+                };
+
                 return (
                   <div key={thisIndex} className="editor-embed">
-                    <div className="both">
+                    <div>
                       <h3>
                         Embed {embeds.length === 1 ? "" : "#" + (thisIndex + 1)}
                       </h3>
                     </div>
 
-                    <div className="both subgrid">
+                    <div className="modalsgrid" style={{ marginTop: "40px" }}>
                       <div>
                         <label style={{ margin: 0 }}>Image URL</label>
                         <IconButton
@@ -275,7 +373,7 @@ const Editor = class extends React.Component {
 
                     <div>
                       <a
-                        href=""
+                        href="#"
                         onClick={() => {
                           this.props.setModal(CustomModal, {
                             exitButtons: [ESC, ENTER],
@@ -312,7 +410,7 @@ const Editor = class extends React.Component {
 
                     <div>
                       <a
-                        href=""
+                        href="#"
                         onClick={() => {
                           this.props.setModal(CustomModal, {
                             exitButtons: [ESC, ENTER],
@@ -322,7 +420,6 @@ const Editor = class extends React.Component {
                                 <div>
                                   <p>Icon URL</p>
                                   <TextInput
-                                    autoFocus={true}
                                     defaultValue={author.icon_url}
                                     maxLength="2000"
                                     onChange={(event) => {
@@ -391,6 +488,33 @@ const Editor = class extends React.Component {
                           setEmbeds(embeds);
                         }}
                       />
+                    </div>
+
+                    <div>
+                      <span>Fields</span>
+                    </div>
+                    <div className="fieldsgrid">
+                      {fields.map((field, index) => {
+                        let fieldName = field.name;
+                        if (fieldName.length > 10) {
+                          fieldName = fieldName.substring(0, 10);
+                        }
+                        return (
+                          <div key={index}>
+                            <a
+                              href="#"
+                              onClick={() => openFieldEditor(field, index)}
+                            >
+                              {fieldName}
+                            </a>
+                          </div>
+                        );
+                      })}
+                      <div>
+                        <a href="#" onClick={() => openFieldEditor(undefined)}>
+                          New
+                        </a>
+                      </div>
                     </div>
                   </div>
                 );

@@ -3,7 +3,6 @@ import React from "react";
 const Modal = class extends React.Component {
   static defaultProps = {
     minWidth: "10vw",
-    minHeight: "10vh",
     maxWidth: "60vw",
     maxHeight: "90vh",
   };
@@ -21,7 +20,6 @@ const Modal = class extends React.Component {
 
     const style = {
       minWidth: this.props.minWidth,
-      minHeight: this.props.minHeight,
       maxWidth: this.props.maxWidth,
       maxHeight: this.props.maxHeight,
     };
