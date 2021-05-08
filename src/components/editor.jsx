@@ -84,6 +84,31 @@ const Editor = class extends React.Component {
     };
   }
 
+  // helper method to clear empty javascript objects from a specified object
+  clearObjectOfEmpty(object) {
+    let properties = Object.keys(object);
+    for (let propertyIndex in properties) {
+      if (!properties.hasOwnProperty(propertyIndex)) {
+        continue;
+      }
+      let property = properties[propertyIndex];
+
+      let value = object[property];
+      if (value === null || value.length === 0) {
+        delete object[property];
+      } else if (typeof value === "object") {
+        this.clearObjectOfEmpty(value);
+        if (value.length === undefined) {
+          if (Object.keys(value).length === 0) {
+            delete object[property];
+          }
+        } else if (value.length === 0) {
+          delete object[property];
+        }
+      }
+    }
+  }
+
   render() {
     const editorDarkTheme = this.props.editorDarkTheme;
     const darkTheme = this.props.darkTheme;
@@ -105,6 +130,21 @@ const Editor = class extends React.Component {
 
     const setData = (data) => this.props.setData(data);
     const setEmbeds = (embeds) => {
+      for (let index in embeds) {
+        if (!embeds.hasOwnProperty(index)) {
+          continue;
+        }
+        let embed = embeds[index];
+
+        this.clearObjectOfEmpty(embed);
+        if (Object.keys(embed).length === 0) {
+          delete embeds[index];
+        } else {
+          embeds[index] = embed;
+        }
+      }
+      embeds = embeds.filter((embed) => embed !== null);
+
       if (singleEmbed || true) {
         // TODO: allow multiple embeds for webhook mode
         data.embed = embeds[0];
