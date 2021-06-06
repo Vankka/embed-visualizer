@@ -67,6 +67,7 @@ function ParagraphInput(props) {
             color: value,
             resize: "vertical",
             width: "100%",
+            minHeight: "2vw",
           }}
           {...props}
         />
@@ -76,11 +77,18 @@ function ParagraphInput(props) {
 }
 
 const Editor = class extends React.Component {
+  defaultState = {
+    username: "Discord Bot",
+    avatar: "https://cdn.discordapp.com/embed/avatars/0.png",
+  };
+
   constructor(props) {
     super(props);
 
     this.state = {
       showColorPicker: false,
+      username: this.defaultState.username,
+      avatar: this.defaultState.avatar,
     };
   }
 
@@ -113,19 +121,20 @@ const Editor = class extends React.Component {
     const editorDarkTheme = this.props.editorDarkTheme;
     const darkTheme = this.props.darkTheme;
     const compactMode = this.props.compactMode;
+    const permitWebhookMode = this.props.permitWebhookMode;
+    const webhookMode = permitWebhookMode && this.props.webhookMode;
 
     let data = this.props.data;
 
     let embeds = data.embeds;
-    let singleEmbed = false;
-    if (embeds === undefined || embeds === null || embeds.length === 0) {
+    if (!webhookMode) {
       let embed = data.embed;
-      if (embed !== undefined && embed) {
-        singleEmbed = true;
+      if (embed !== null && embed !== undefined) {
         embeds = [embed];
-      } else {
-        embeds = [{}];
       }
+    }
+    if (embeds === undefined || embeds === null || embeds.length === 0) {
+      embeds = [{}];
     }
 
     const setData = (data) => this.props.setData(data);
@@ -145,11 +154,10 @@ const Editor = class extends React.Component {
       }
       embeds = embeds.filter((embed) => embed !== null);
 
-      if (singleEmbed || true) {
-        // TODO: allow multiple embeds for webhook mode
-        data.embed = embeds[0];
-      } else {
+      if (webhookMode) {
         data.embeds = embeds;
+      } else {
+        data.embed = embeds[0];
       }
       setData(data);
     };
@@ -165,6 +173,7 @@ const Editor = class extends React.Component {
             style={{
               padding: "10px",
               color: editorDarkTheme ? "white" : "black",
+              overflowY: "auto",
             }}
           >
             <div className="toolbar">
@@ -205,6 +214,90 @@ const Editor = class extends React.Component {
             <InputTextColorContext.Provider
               value={editorDarkTheme ? "white" : "black"}
             >
+              {permitWebhookMode ? (
+                <div className="editor-grid" style={{ marginTop: "10px" }}>
+                  <h3 className="both">Webhook</h3>
+                  <input
+                    type="checkbox"
+                    onChange={(event) => {
+                      let checked = event.target.checked;
+                      if (!checked) {
+                        let clearUsernameAndAvatar = () =>
+                          this.setState(this.defaultState);
+                        if (embeds.length > 1) {
+                          event.preventDefault();
+                          this.props.setModal(CustomModal, {
+                            title: "Are you sure?",
+                            children: () => {
+                              return (
+                                <div>
+                                  <h4>
+                                    Are you sure you would like to exit webhook
+                                    mode?
+                                  </h4>
+                                  <p>
+                                    All embeds besides the first embed will be
+                                    removed, due to regular messages only
+                                    supporting a single embed
+                                  </p>
+                                  <button
+                                    onClick={() => {
+                                      this.props.setWebhookMode(false);
+                                      clearUsernameAndAvatar();
+                                    }}
+                                  >
+                                    Exit Webhook Mode
+                                  </button>
+                                </div>
+                              );
+                            },
+                          });
+                          return;
+                        }
+                        clearUsernameAndAvatar();
+                      }
+
+                      this.props.setWebhookMode(checked);
+                    }}
+                    checked={webhookMode}
+                  />
+                  <label>Enable webhook mode</label>
+
+                  {webhookMode ? (
+                    <div className="both editor-grid">
+                      <label>Webhook username</label>
+                      <TextInput
+                        onChange={(event) =>
+                          this.setState({ username: event.target.value })
+                        }
+                        defaultValue={this.state.username}
+                      />
+
+                      <label>Webhook Avatar URL</label>
+                      <IconButton
+                        click={() => {
+                          this.props.setModal(CustomModal, {
+                            exitButtons: [ESC, ENTER],
+                            title: "Set the webhook avatar URL",
+                            children: () => (
+                              <TextInput
+                                autoFocus={true}
+                                defaultValue={this.state.avatar}
+                                maxLength="2000"
+                                onChange={(event) =>
+                                  this.setState({ avatar: event.target.value })
+                                }
+                              />
+                            ),
+                          });
+                        }}
+                        icon={faImage}
+                      />
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
+
               <h3>Content</h3>
               <ParagraphInput
                 id="messagecontent"
@@ -320,11 +413,9 @@ const Editor = class extends React.Component {
                 };
 
                 return (
-                  <div key={thisIndex} className="editor-embed">
+                  <div key={thisIndex} className="editor-grid">
                     <div>
-                      <h3>
-                        Embed {embeds.length === 1 ? "" : "#" + (thisIndex + 1)}
-                      </h3>
+                      <h3>Embed {webhookMode ? "#" + (thisIndex + 1) : ""}</h3>
                     </div>
 
                     <div className="modalsgrid" style={{ marginTop: "40px" }}>
@@ -568,6 +659,8 @@ const Editor = class extends React.Component {
             darkTheme={darkTheme}
             compactMode={this.props.compactMode}
             data={this.props.data}
+            avatar_url={this.state.avatar}
+            username={this.state.username}
           />
         </div>
       </section>

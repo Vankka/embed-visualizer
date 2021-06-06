@@ -8,55 +8,55 @@
   margin: 5px;
 }
 
-.editor-embed {
+.editor-grid {
   display: grid;
 
   grid-template-columns: 5.5em auto;
   row-gap: 10px;
 }
-.editor-embed h3 {
+.editor-grid h3 {
   margin: 10px 0 0;
 }
-.editor-embed a:link {
+.editor-grid a:link {
   color: inherit;
 }
-.editor-embed a:visited {
+.editor-grid a:visited {
   color: inherit;
 }
-.editor-embed a:hover {
+.editor-grid a:hover {
   color: inherit;
 }
 
-.editor-embed .both {
+.editor-grid .both {
   grid-column: 1 / 3;
 }
 
-.editor-embed .modalsgrid {
+.editor-grid .modalsgrid {
   display: grid;
 
   justify-items: center;
 }
 
 @media only screen and (max-width: 40em) {
-  .editor-embed .modalsgrid {
+  .editor-grid .modalsgrid {
     grid-template-columns: 1fr;
     row-gap: 10px;
   }
 }
 @media only screen and (min-width: 41em) {
-  .editor-embed .modalsgrid {
+  .editor-grid .modalsgrid {
     grid-template-columns: 1fr 1fr 1fr;
     margin-bottom: 5px;
   }
 }
 
-.editor-embed .modalsgrid > div {
+.editor-grid .modalsgrid > div {
   display: grid;
   grid-template-columns: auto 0.5em;
   gap: 0.5em;
 }
 
-.editor-embed .fieldsgrid {
+.editor-grid .fieldsgrid {
   display: grid;
 
   justify-items: center;
@@ -73,7 +73,7 @@
   margin-bottom: 5px;
 }
 
-.editor-embed .texturls {
+.editor-grid .texturls {
   grid-row: 3 / 5;
 
   display: grid;

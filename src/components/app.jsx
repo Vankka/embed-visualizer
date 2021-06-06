@@ -17,6 +17,7 @@ const App = class extends React.Component {
       modal: null,
       modalProps: {},
       data: {},
+      webhookMode: false,
     };
   }
 
@@ -32,6 +33,9 @@ const App = class extends React.Component {
               setDarkTheme={(value) => this.setState({ darkTheme: value })}
               compactMode={this.state.compactMode}
               setCompactMode={(value) => this.setState({ compactMode: value })}
+              permitWebhookMode={true}
+              webhookMode={this.state.webhookMode}
+              setWebhookMode={(value) => this.setState({ webhookMode: value })}
               import={() =>
                 this.setState({ modal: ImportModal, modalProps: [] })
               }
@@ -55,7 +59,6 @@ const App = class extends React.Component {
           darkTheme={this.state.darkTheme}
           data={this.state.data}
           setData={(data) => this.setState({ data: data })}
-          webhookMode={false}
           {...this.state.modalProps}
         />
       </div>
