@@ -11,6 +11,9 @@ esbuild.build({
   format: "esm",
   target: "esnext",
   plugins: [nodeExternalsPlugin()],
+  loader: {
+    ".png": "file",
+  },
 });
 
 esbuild.build({
@@ -22,4 +25,7 @@ esbuild.build({
   format: "cjs",
   target: "esnext",
   plugins: [nodeExternalsPlugin()],
+  loader: {
+    ".png": "file",
+  },
 });

@@ -6,7 +6,7 @@
     "liz3"
   ],
   "license": "MIT",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "homepage": "https://github.com/Vankka/embed-visualizer/",
   "devDependencies": {
     "@types/react": "^18.0.18",
